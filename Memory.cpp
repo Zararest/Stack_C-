@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "Memory.h"
+#include "headers/Memory.h"
 
 Memory::Memory(){
 
