@@ -2,8 +2,8 @@
 
 Memory::Memory(){
 
-    //Memory_log = fopen("Memory_log.txt", "w");
-    Memory_log = stdout;
+    Memory_log = fopen("Memory_log.txt", "w");
+    //Memory_log = stdout;
     add_to_log("Memory constructor was called");
     array_of_canary = NULL;
     canary_count = 0;
@@ -12,6 +12,7 @@ Memory::Memory(){
 Memory::~Memory(){
 
     add_to_log("Memory destructor was called");
+    fclose(Memory_log);
     canary_count = 0;
 }
 
@@ -31,7 +32,7 @@ void* Memory::calloc_class(int num_of_elem, int size_of_elem){
     char* tmp = (char*)calloc(num_of_elem * size_of_elem + 2 * sizeof(long int), 1);
     ((long int*) tmp)[0] = (long int) tmp;
     *( (long int*) (tmp + sizeof(long int) + num_of_elem * size_of_elem ) )= (long int) ( tmp + sizeof(long int) + num_of_elem * size_of_elem ) ;
-    void* tmp_void = (void*) ( tmp + sizeof(int) );
+    void* tmp_void = (void*) ( tmp + sizeof(long int) );
 
     array_of_canary = (long int**) realloc(array_of_canary, (canary_count + 2) * sizeof(long int*));
     array_of_canary[canary_count] = (long int*) tmp;
@@ -91,13 +92,11 @@ void Memory::free_class(void* point){
     add_to_log("Free was called and address:", (long int) point);
     int num_of_prev_canary = 0;
 
-    if (point == NULL)
-    {
-        return ;
-    }
+    assert(point != NULL);
     
-    if  (  *( ((long int*) point) - 1) == (long int) ( ((long int*) point) - 1) )
-    {
+    if  ( *(((long int*) point) - 1) == (long int) ( ((long int*) point) - 1) )
+    {   
+        
         while ( ( (((long int*) point) - 1)  != array_of_canary[num_of_prev_canary] ) && ( num_of_prev_canary < (canary_count - 1) ) )
         {
             num_of_prev_canary++;
@@ -114,7 +113,8 @@ void Memory::free_class(void* point){
         free( ((long int*) point) - 1 );
     } else
     {
-        exit(010);
+        printf("left = %lx right = %lx\n", *( ((long int*) point) - 1), (long int) ( ((long int*) point) - 1));
+        exit(10);
     }
 
 }

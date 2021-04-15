@@ -4,8 +4,8 @@ template <typename T>
 Stack<T>::Stack(int size_stack, int level_of_secur){
 
     int size_elem = sizeof(T);
-    //log = fopen("Stack_log.txt", "w");
-    log = stdout;
+    log = fopen("Stack_log.txt", "w");
+    //log = stdout;
     ADD_TO_LOG("Constructor was called", 0);
     int i = 0;
 
@@ -57,7 +57,7 @@ Stack<T>::~Stack(){
     size_of_elem = 0;
     size_of_stack = 0;
 
-    //fclose(log);
+    fclose(log);
 }
 
 
@@ -124,7 +124,7 @@ T Stack<T>::pop(){
     int i = 0, j = 0;
 
     CONDITION_CHECK(EXIT_IN_POP)
-
+    
     unsigned char* tmp = (unsigned char*) calloc_class(size_of_elem + 1, sizeof(unsigned char));
     assert(tmp != NULL);
 
@@ -150,7 +150,9 @@ T Stack<T>::pop(){
 
     ADD_TO_LOG("pop:", POP)
     T strange_tmp = *((T*)tmp);
+    
     free_class(tmp);
+    printf("dafuq\n");
     return strange_tmp;
 }
 
