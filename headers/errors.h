@@ -1,4 +1,4 @@
-#define ADD_TO_LOG(str, num) fprintf(log, "%s [%i]\n", str, log);
+#define ADD_TO_LOG(str, num) fprintf(log, "%s [%i]\n", str, num);
 #define CONDITION_CHECK(exit_code) if (silent_ok() != 0){\
                                        exit(exit_code); }\
 

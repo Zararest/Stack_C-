@@ -4,7 +4,9 @@ template <typename T>
 Stack<T>::Stack(int size_stack, int level_of_secur){
 
     int size_elem = sizeof(T);
-    log = fopen("Stack_log.txt", "w");
+    //log = fopen("Stack_log.txt", "w");
+    log = stdout;
+    ADD_TO_LOG("Constructor was called", 0);
     int i = 0;
 
     if (size_stack <= 0){
@@ -39,6 +41,7 @@ Stack<T>::Stack(int size_stack, int level_of_secur){
 template <typename T>
 Stack<T>::~Stack(){
 
+    ADD_TO_LOG("Destructor was_called", 0);
     CONDITION_CHECK(EXIT_IN_DESTR)
 
     int i = 0;
@@ -54,7 +57,7 @@ Stack<T>::~Stack(){
     size_of_elem = 0;
     size_of_stack = 0;
 
-    fclose(log);
+    //fclose(log);
 }
 
 
@@ -182,7 +185,7 @@ int Stack<T>::dump(void (*type_print)(unsigned char*, FILE*)){
     case 0:
         printf("Probably, stack is ok\n");
         printf("is stack ok?");
-        //system("yes");//надо удалить(скорее всего наеб)
+        system("yes");//надо удалить(скорее всего наеб)
         //int a = *(0);
         break;
 

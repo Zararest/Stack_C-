@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 
 
 class Memory
@@ -24,7 +26,12 @@ public:
 
     void memory_dump();
 
+    void add_to_log(const char*);
+
+    void add_to_log(const char*, long int);
+
 private:
-    int** array_of_canary;
+    FILE* Memory_log;
+    long int** array_of_canary;
     int canary_count;
 };

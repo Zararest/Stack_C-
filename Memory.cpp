@@ -1,20 +1,23 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "headers/Memory.h"
 
 Memory::Memory(){
 
+    //Memory_log = fopen("Memory_log.txt", "w");
+    Memory_log = stdout;
+    add_to_log("Memory constructor was called");
     array_of_canary = NULL;
     canary_count = 0;
 }
 
 Memory::~Memory(){
 
+    add_to_log("Memory destructor was called");
     canary_count = 0;
 }
 
 void* Memory::calloc_class(int num_of_elem, int size_of_elem){
 
+    add_to_log("Calloc was called. Number of bytes", num_of_elem * size_of_elem);
     if (num_of_elem <= 0)
     {
         return NULL;
@@ -25,14 +28,14 @@ void* Memory::calloc_class(int num_of_elem, int size_of_elem){
         return NULL;
     }
 
-    char* tmp = (char*)calloc(num_of_elem * size_of_elem + 2 * sizeof(int), 1);
-    ((int*) tmp)[0] = (int) tmp;
-    *( (int*) (tmp + sizeof(int) + num_of_elem * size_of_elem ) )= (int) ( tmp + sizeof(int) + num_of_elem * size_of_elem ) ;
+    char* tmp = (char*)calloc(num_of_elem * size_of_elem + 2 * sizeof(long int), 1);
+    ((long int*) tmp)[0] = (long int) tmp;
+    *( (long int*) (tmp + sizeof(long int) + num_of_elem * size_of_elem ) )= (long int) ( tmp + sizeof(long int) + num_of_elem * size_of_elem ) ;
     void* tmp_void = (void*) ( tmp + sizeof(int) );
 
-    array_of_canary = (int**) realloc(array_of_canary, (canary_count + 2) * sizeof(int*));
-    array_of_canary[canary_count] = (int*) tmp;
-    array_of_canary[canary_count + 1] = (int*) ( tmp + num_of_elem * size_of_elem + sizeof(int) );
+    array_of_canary = (long int**) realloc(array_of_canary, (canary_count + 2) * sizeof(long int*));
+    array_of_canary[canary_count] = (long int*) tmp;
+    array_of_canary[canary_count + 1] = (long int*) ( tmp + num_of_elem * size_of_elem + sizeof(long int) );
 
     canary_count++;
     canary_count++;
@@ -43,6 +46,7 @@ void* Memory::calloc_class(int num_of_elem, int size_of_elem){
 
 void* Memory::realloc_class(void* prev_point, int num_of_byte){
 
+    add_to_log("Realloc was called and address:", (long int) prev_point);
     if (prev_point == NULL)
     {            
         return calloc_class(num_of_byte, 1);
@@ -54,7 +58,7 @@ void* Memory::realloc_class(void* prev_point, int num_of_byte){
     void* tmp_void = NULL;
 
 
-    while ( ((((int*) prev_point) - 1)  != array_of_canary[num_of_prev_canary]) && (num_of_prev_canary < (canary_count - 1) ) )
+    while ( ((((long int*) prev_point) - 1)  != array_of_canary[num_of_prev_canary]) && (num_of_prev_canary < (canary_count - 1) ) )
     {
         num_of_prev_canary++;
     }
@@ -64,26 +68,27 @@ void* Memory::realloc_class(void* prev_point, int num_of_byte){
         return NULL;
     }
 
-    new_line = (char*) realloc( ((int*) prev_point) - 1, num_of_byte + 2 * sizeof(int));
+    new_line = (char*) realloc( ((long int*) prev_point) - 1, num_of_byte + 2 * sizeof(long int));
 
     if (new_line == NULL)
     {
         return NULL;
     }
 
-    ((int*) new_line)[0] = (int) new_line;
-    *( (int*) ( new_line + sizeof(int) + num_of_byte ) )= (int) ( new_line + sizeof(int) + num_of_byte ) ;
+    ((long int*) new_line)[0] = (long int) new_line;
+    *( (long int*) ( new_line + sizeof(long int) + num_of_byte ) )= (long int) ( new_line + sizeof(long int) + num_of_byte ) ;
 
 
-    array_of_canary[num_of_prev_canary] = (int*) new_line;
-    array_of_canary[num_of_prev_canary + 1] = (int*) ( new_line + sizeof(int) + num_of_byte );
-    tmp_void = (void*) (new_line + sizeof(int));
+    array_of_canary[num_of_prev_canary] = (long int*) new_line;
+    array_of_canary[num_of_prev_canary + 1] = (long int*) ( new_line + sizeof(long int) + num_of_byte );
+    tmp_void = (void*) (new_line + sizeof(long int));
 
     return tmp_void;
 }
 
 void Memory::free_class(void* point){
 
+    add_to_log("Free was called and address:", (long int) point);
     int num_of_prev_canary = 0;
 
     if (point == NULL)
@@ -91,9 +96,9 @@ void Memory::free_class(void* point){
         return ;
     }
     
-    if  (  *( ((int*) point) - 1) == (int) ( ((int*) point) - 1) )
+    if  (  *( ((long int*) point) - 1) == (long int) ( ((long int*) point) - 1) )
     {
-        while ( ( (((int*) point) - 1)  != array_of_canary[num_of_prev_canary] ) && ( num_of_prev_canary < (canary_count - 1) ) )
+        while ( ( (((long int*) point) - 1)  != array_of_canary[num_of_prev_canary] ) && ( num_of_prev_canary < (canary_count - 1) ) )
         {
             num_of_prev_canary++;
         }
@@ -106,7 +111,7 @@ void Memory::free_class(void* point){
         array_of_canary[num_of_prev_canary] = NULL;
         array_of_canary[num_of_prev_canary + 1] = NULL;
 
-        free( ((int*) point) - 1 );
+        free( ((long int*) point) - 1 );
     } else
     {
         exit(010);
@@ -117,6 +122,7 @@ void Memory::free_class(void* point){
 
 int Memory::light_check(){
 
+    add_to_log("Light check was called");
     int i = 0;
     int mas_of_err[canary_count] = {0};
     int num_of_err = 0;
@@ -125,7 +131,7 @@ int Memory::light_check(){
     {
         if (array_of_canary[i] != NULL)
         {
-            if (*array_of_canary[i] != (int) array_of_canary[i])
+            if (*array_of_canary[i] != (long int) array_of_canary[i])
             {
                 num_of_err++;
                 mas_of_err[i] = 1;
@@ -164,6 +170,7 @@ int Memory::light_check(){
 
 int Memory::memory_check (void* point){
 
+    add_to_log("Memory check was called and address", (long int) point);
     int num_of_prev_canary = 0;
 
     if (point == NULL)
@@ -171,9 +178,9 @@ int Memory::memory_check (void* point){
         return 1;
     }
 
-    if  (  *(((int*) point) - 1) != (int) (((int*) point) - 1) )
+    if  (  *(((long int*) point) - 1) != (long int) (((long int*) point) - 1) )
     {
-        while ( ( (((int*) point) - 1)  != array_of_canary[num_of_prev_canary] ) && ( num_of_prev_canary < (canary_count - 1) ) )
+        while ( ( (((long int*) point) - 1)  != array_of_canary[num_of_prev_canary] ) && ( num_of_prev_canary < (canary_count - 1) ) )
         {
             num_of_prev_canary++;
         }
@@ -193,6 +200,7 @@ int Memory::memory_check (void* point){
 
 void Memory::memory_dump(){
 
+    add_to_log("Dump was called");
     FILE* dump_file = fopen("Dynamic memory.txt", "w");
     int i = 0, j = 0, k = 0;
 
@@ -201,9 +209,9 @@ void Memory::memory_dump(){
 
         if ( array_of_canary[i * 2] != NULL)
         {
-            fprintf(dump_file, "%i) point |%x|:\n", k + 1, (int) (array_of_canary[i * 2] + 1));
+            fprintf(dump_file, "%i) point |%lx|:\n", k + 1, (long int) (array_of_canary[i * 2] + 1));
 
-            for (j = 0 ; j < ( (int) array_of_canary[i * 2 + 1] - (int) (array_of_canary[i * 2] + 1) ); j++)
+            for (j = 0 ; j < ( (long int) array_of_canary[i * 2 + 1] - (long int) (array_of_canary[i * 2] + 1) ); j++)
             {
                 fprintf(dump_file, "[%i] ", *(( (unsigned char*) (array_of_canary[i * 2] + 1) ) + j) );
             }
@@ -215,4 +223,13 @@ void Memory::memory_dump(){
     fclose(dump_file);
 }
 
+void Memory::add_to_log(const char* line){
+
+    fprintf(Memory_log, "%s\n", line);
+}
+
+void Memory::add_to_log(const char* line, long int num){
+
+    fprintf(Memory_log, "%s [%lx]\n", line, num);
+}
 
