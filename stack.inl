@@ -4,6 +4,7 @@ template <typename T>
 Stack<T>::Stack(int size_stack, int level_of_secur){
 
     int size_elem = sizeof(T);
+    linked_elem = 0;
     log = fopen("Stack_log.txt", "w");
     //log = stdout;
     ADD_TO_LOG("Constructor was called", 0);
@@ -39,9 +40,29 @@ Stack<T>::Stack(int size_stack, int level_of_secur){
 }
 
 template <typename T>
+void Stack<T>::recover_linked_elem(){
+
+    int i = 0;
+    for (i = 0; i < arrays_count; i++){
+
+        arrays_of_data[i][linked_elem] = arrays_of_data[0][linked_elem];
+    }
+}
+
+template <typename T>
+T& Stack<T>::operator [](int n){
+
+    recover_linked_elem() ;
+
+    linked_elem = n;
+    return arrays_of_data[0][n];
+}
+
+template <typename T>
 Stack<T>::~Stack(){
 
     ADD_TO_LOG("Destructor was_called", 0);
+    recover_linked_elem();
     CONDITION_CHECK(EXIT_IN_DESTR)
 
     int i = 0;
@@ -71,6 +92,7 @@ int Stack<T>::push(T val){//добавить в лог
     */
     int i = 0, j = 0;
 
+    recover_linked_elem();
     CONDITION_CHECK(EXIT_IN_PUSH)
 
     if (sizeof(val) == size_of_elem){
@@ -123,6 +145,7 @@ T Stack<T>::pop(){
 
     int i = 0, j = 0;
 
+    recover_linked_elem();
     CONDITION_CHECK(EXIT_IN_POP)
     
     unsigned char* tmp = (unsigned char*) calloc_class(size_of_elem + 1, sizeof(unsigned char));
@@ -159,6 +182,7 @@ T Stack<T>::pop(){
 template <typename T>
 void Stack<T>::stack_resize(){
 
+    recover_linked_elem();
     int new_size = ((int) size_of_stack * 1.41) + 1;
     int j = 0, i = 0;
 
@@ -177,6 +201,7 @@ void Stack<T>::stack_resize(){
 template <typename T>
 int Stack<T>::dump(void (*type_print)(unsigned char*, FILE*)){
 
+    recover_linked_elem();
     int i = 0;
     FILE* dump_file = fopen("stack_dump.txt", "w");
 
@@ -306,6 +331,7 @@ int Stack<T>::silent_ok(){
 template <typename T>
 int Stack<T>::stack_recovery(){
 
+    recover_linked_elem();
     int* num_of_each_elem = (int*) calloc(256, sizeof(int));
     unsigned char* real_array = (unsigned char*) calloc(size_of_stack, size_of_elem);
     int* array_of_err = (int*) calloc(size_of_stack, size_of_elem);

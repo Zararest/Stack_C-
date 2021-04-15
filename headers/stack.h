@@ -27,7 +27,7 @@ class Stack: public Memory{
 
    +8) отдельный файл с расшифровкой ошибок
 
-    9) наладить гитхаб для этого проекта 
+   +9) наладить гитхаб для этого проекта 
 
     */
     Stack(int, int);
@@ -52,9 +52,13 @@ class Stack: public Memory{
 
     int stack_recovery();
 
+    void recover_linked_elem();
+
     int errors;
 
     private:
+
+    int linked_elem;
 
     unsigned char** arrays_of_data;
 
